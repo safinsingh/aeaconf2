@@ -49,3 +49,33 @@ func CheckFunctionRegistry(funcs map[string]reflect.Type) {
 		}
 	}
 }
+
+func (c *Config) DistributeMaxPoints() {
+	var unspecifiedPointsChecks []*Check
+	totalCheckPoints := 0
+	for _, check := range c.Checks {
+		totalCheckPoints += check.Points
+		if check.NeedsPoints {
+			unspecifiedPointsChecks = append(unspecifiedPointsChecks, check)
+		}
+	}
+
+	pointsRemaining := c.Round.MaxPoints - totalCheckPoints
+	pointsPerCheck := pointsRemaining / len(unspecifiedPointsChecks)
+
+	if pointsPerCheck < 1 {
+		Fatal(STAGE_DISTRIBUTION,
+			fmt.Sprintf(
+				"cannot distribute points to unspecified-point vulns without overflowing maximum image points (%d). %s %d",
+				c.Round.MaxPoints,
+				"please adjust the configuration file: increase 'maxPoints' under '[round]' to at least",
+				totalCheckPoints+len(unspecifiedPointsChecks),
+			),
+		)
+	}
+
+	for _, check := range unspecifiedPointsChecks {
+		check.Points = pointsPerCheck
+		check.NeedsPoints = false
+	}
+}

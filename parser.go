@@ -16,6 +16,8 @@ type Condition interface {
 type Check struct {
 	Message string
 	Points  int
+	// points were left unspecified
+	NeedsPoints bool
 
 	// the root condition can have a hint
 	Condition
@@ -240,7 +242,7 @@ func (p *Parser) NextCheck() *Check {
 	if !(p.Peek().Type == TokenUnderscore) {
 		p.CurrentCheck = p.ExpectTokenType(
 			TokenString,
-			"expected check title as a string",
+			"expected check title as a string or placeholder ('_')",
 		).Value().(string)
 	} else {
 		p.Consume()
@@ -251,10 +253,18 @@ func (p *Parser) NextCheck() *Check {
 		fmt.Sprintf("expected a colon following the check message: '%s'", p.CurrentCheck),
 	)
 
-	checkPoints := p.ExpectTokenType(
-		TokenNumber,
-		fmt.Sprintf("expected numeric point value to follow colon for check: '%s'", p.CurrentCheck),
-	).Value().(int)
+	points := 0
+	needsPoints := false
+	// if point number isn't a placeholder
+	if !(p.Peek().Type == TokenUnderscore) {
+		points = p.ExpectTokenType(
+			TokenNumber,
+			fmt.Sprintf("expected numeric point value to follow colon for check: '%s'", p.CurrentCheck),
+		).Value().(int)
+	} else {
+		p.Consume()
+		needsPoints = true
+	}
 
 	rootHint, hinted := p.MaybeParseHint()
 
@@ -287,7 +297,7 @@ func (p *Parser) NextCheck() *Check {
 	}
 
 	p.CurrentCheck = "N/A"
-	return &Check{Message: checkString, Points: checkPoints, Condition: finalCond}
+	return &Check{Message: checkString, Points: points, NeedsPoints: needsPoints, Condition: finalCond}
 }
 
 func (p *Parser) Checks() []*Check {

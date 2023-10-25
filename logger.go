@@ -12,17 +12,23 @@ import (
 type CompilerStage int
 
 const (
-	STAGE_LEXER CompilerStage = iota
+	STAGE_INI CompilerStage = iota
+	STAGE_LEXER
 	STAGE_PARSER
+	STAGE_DISTRIBUTION
 )
 
 func Fatal(stage CompilerStage, message string) {
 	var stageStr string
 	switch stage {
+	case STAGE_INI:
+		stageStr = "ini parser"
 	case STAGE_LEXER:
 		stageStr = "lexer"
 	case STAGE_PARSER:
 		stageStr = "parser"
+	case STAGE_DISTRIBUTION:
+		stageStr = "point distribution"
 	}
 
 	log.Fatalf("[%s] FATAL: %s", stageStr, message)

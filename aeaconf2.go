@@ -25,12 +25,16 @@ func main() {
 	data, _ := os.ReadFile("example.acf")
 	headerIni, checksRaw := separateConfig(data)
 
-	var config Config
-	ini.StrictMapTo(headerIni, config)
+	config := NewConfig()
+	err := ini.MapTo(config, headerIni)
+	if err != nil {
+		Fatal(STAGE_INI, fmt.Sprintf("failed to parse ini header: %s", err.Error()))
+	}
 
 	l := NewLexer(bytes.TrimSpace(checksRaw))
 	p := NewParser(l)
 	config.Checks = p.Checks()
+	config.DistributeMaxPoints()
 
 	for _, check := range config.Checks {
 		fmt.Println(check.Debug() + "\n")
