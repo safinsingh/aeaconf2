@@ -8,7 +8,7 @@ new config format for [aeacus](https://github.com/elysium-suite/aeacus)
 - the check/condition definitions use the custom language
 - comments are denoted by two forward slashes ("//")
 
-```c
+```hcl
 [round]
 title = "Linux ICC"
 os = "Ubuntu 20.04.03"
