@@ -10,6 +10,8 @@ func init() {
 	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
 	funcRegistry["FileContains"] = reflect.TypeOf(FileContains{})
 	funcRegistry["ServiceUp"] = reflect.TypeOf(ServiceUp{})
+
+	CheckFunctionRegistry(funcRegistry)
 }
 
 type PathExists struct {
