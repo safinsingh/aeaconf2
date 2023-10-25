@@ -19,7 +19,7 @@ enable = true
 name = LinICC
 server = https://scoring.cyberaegis.tech
 password = password
-\-\-\-
+---
 // check messages must be enclosed in quotes
 "Check1: cool vuln!": 2
   // condition lines MUST be indented
