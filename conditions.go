@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -50,21 +51,34 @@ func (a *AndExpr) Score() bool {
 	return a.Lhs.Score() && a.Rhs.Score()
 }
 
+func (a *AndExpr) DefaultString() string {
+	return fmt.Sprintf("(%s AND %s)", a.Lhs.DefaultString(), a.Rhs.DefaultString())
+}
+
 type OrExpr struct {
 	BaseCondition
 	Lhs Condition
 	Rhs Condition
 }
 
-func (a *OrExpr) Score() bool {
-	return a.Lhs.Score() || a.Rhs.Score()
+func (o *OrExpr) Score() bool {
+	return o.Lhs.Score() || o.Rhs.Score()
+}
+
+func (o *OrExpr) DefaultString() string {
+	return fmt.Sprintf("(%s OR %s)", o.Lhs.DefaultString(), o.Rhs.DefaultString())
 }
 
 type NotFunc struct {
 	BaseCondition
+	// Func is always a function call
 	Func Condition
 }
 
 func (n *NotFunc) Score() bool {
 	return !n.Func.Score()
+}
+
+func (n *NotFunc) DefaultString() string {
+	return fmt.Sprintf("NOT (%s)", n.Func.DefaultString())
 }

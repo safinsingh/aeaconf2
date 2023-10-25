@@ -19,6 +19,7 @@ const (
 
 	TokenColon
 	TokenSemicolon
+	TokenUnderscore
 
 	TokenAnd
 	TokenOr
@@ -48,6 +49,8 @@ func (ty TokenType) Str() string {
 		return "TokenColon"
 	case TokenSemicolon:
 		return "TokenSemicolon"
+	case TokenUnderscore:
+		return "TokenUnderscore"
 	case TokenAnd:
 		return "TokenAnd"
 	case TokenOr:
@@ -211,6 +214,8 @@ func (l *Lexer) NextToken() *Token {
 		return l.AdvanceToken(TokenColon, ch)
 	case ';':
 		return l.AdvanceToken(TokenSemicolon, ch)
+	case '_':
+		return l.AdvanceToken(TokenUnderscore, ch)
 	case '&':
 		return l.AdvanceToken2(TokenAnd, ch, '&')
 	case '|':

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -19,8 +20,12 @@ type PathExists struct {
 	Path string
 }
 
-func (p PathExists) Score() bool {
+func (p *PathExists) Score() bool {
 	return true
+}
+
+func (p *PathExists) DefaultString() string {
+	return fmt.Sprintf("Path '%s' exists", p.Path)
 }
 
 type FileContains struct {
@@ -29,8 +34,12 @@ type FileContains struct {
 	Value string
 }
 
-func (f FileContains) Score() bool {
+func (f *FileContains) Score() bool {
 	return true
+}
+
+func (f *FileContains) DefaultString() string {
+	return fmt.Sprintf("File '%s' contains '%s'", f.File, f.Value)
 }
 
 type ServiceUp struct {
@@ -38,8 +47,12 @@ type ServiceUp struct {
 	Service string
 }
 
-func (f ServiceUp) Score() bool {
+func (s *ServiceUp) Score() bool {
 	return true
+}
+
+func (s *ServiceUp) DefaultString() string {
+	return fmt.Sprintf("Service '%s' is running", s.Service)
 }
 
 // add more...
