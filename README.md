@@ -5,20 +5,21 @@ new config format for [aeacus](https://github.com/elysium-suite/aeacus)
 ## syntax
 
 - the beginning part is ini
-- the check/condition definitions use the custom language (see comments)
+- the check/condition definitions use the custom language
+- comments are denoted by two forward slashes ("//")
 
-```
+```c
 [round]
-title = Linux ICC
-os = Ubuntu 20.04.03
-user = cpadmin
+title = "Linux ICC"
+os = "Ubuntu 20.04.03"
+user = "cpadmin"
 local = false
 
 [remote]
 enable = true
-name = LinICC
-server = https://scoring.cyberaegis.tech
-password = password
+name = "LinICC"
+server = "https://scoring.cyberaegis.tech"
+password = "password"
 ---
 // check messages must be enclosed in quotes
 "Check1: cool vuln!": 2
@@ -48,44 +49,6 @@ password = password
 
 # parsed
 
-this is the parsed output (it parses hints as well on a per-check, per-condition, and even per-boolean-expression level)
+this is the parsed output (it parses hints on a per-check, per-condition, and even per-boolean-expression level)
 
-```
-Check1: cool vuln! : 2
-  AND {
-    ServiceUp(Service="sshd")
-    PathExists(Path="/etc/ssh")
-  }
-
-Check2 : -3
-  OR {
-    OR {
-      AND {
-        ServiceUp(Service="sshd")
-        NOT {
-          PathExists(Path="/abc")
-        }
-      }
-      ServiceUp(Service="samba")
-    }
-    AND {
-      OR {
-        PathExists(Path="/etc/ssh")
-        PathExists(Path="/var")
-      }
-      ServiceUp(Service="abc")
-    }
-  }
-
-Check3 : 4
-  OR {
-    ServiceUp(Service="sshd")
-    PathExists(Path="/etc/ssh")
-  }
-
-Check4 : 6
-  AND {
-    ServiceUp(Service="sshd")
-    PathExists(Path="/")
-  }
-```
+![](./assets/screenshot.png)

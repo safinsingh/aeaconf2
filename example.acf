@@ -1,14 +1,14 @@
 [round]
-title = Linux ICC
-os = Ubuntu 20.04.03
-user = cpadmin
+title = "Linux ICC"
+os = "Ubuntu 20.04.03"
+user = "cpadmin"
 local = false
 
 [remote]
 enable = true
-name = LinICC
-server = https://scoring.cyberaegis.tech
-password = password
+name = "LinICC"
+server = "https://scoring.cyberaegis.tech"
+password = "password"
 ---
 // check messages must be enclosed in quotes
 "Check1: cool vuln!": 2

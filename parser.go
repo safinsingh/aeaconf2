@@ -3,54 +3,12 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"strings"
+
+	"github.com/fatih/color"
 )
 
 type Condition interface {
 	Score() bool
-}
-
-func DebugCondition(cond Condition) string {
-	return DebugCondition1(cond, 1)
-}
-
-func indentWrap(str string, indentStr string) string {
-	return indentStr + str + indentStr + "}"
-}
-
-func DebugCondition1(cond Condition, indent int) string {
-	indentStr := strings.Repeat("  ", indent)
-
-	switch c := cond.(type) {
-	case *OrExpr:
-		return indentWrap(fmt.Sprintf("OR {\n%s\n%s\n",
-			DebugCondition1(c.Lhs, indent+1),
-			DebugCondition1(c.Rhs, indent+1)), indentStr)
-	case *AndExpr:
-		return indentWrap(fmt.Sprintf("AND {\n%s\n%s\n",
-			DebugCondition1(c.Lhs, indent+1),
-			DebugCondition1(c.Rhs, indent+1)), indentStr)
-	case *NotFunc:
-		return indentWrap(fmt.Sprintf("NOT {\n%s\n",
-			DebugCondition1(c.Func, indent+1)), indentStr)
-	default:
-		val := reflect.ValueOf(cond)
-		ty := val.Type()
-
-		if val.Kind() == reflect.Ptr && !val.IsNil() {
-			val = val.Elem()
-			ty = val.Type()
-		}
-
-		var parts []string
-		for i := 1; i < val.NumField(); i++ {
-			field := ty.Field(i)
-			value := val.Field(i)
-			parts = append(parts, fmt.Sprintf("%s=\"%v\"", field.Name, value))
-		}
-
-		return fmt.Sprintf("%s%s(%s)", indentStr, ty.Name(), strings.Join(parts, ", "))
-	}
 }
 
 type Check struct {
@@ -62,7 +20,8 @@ type Check struct {
 }
 
 func (c *Check) Debug() string {
-	ret := fmt.Sprintf("%s : %d\n", c.Message, c.Points)
+	cl := color.New(color.Bold).Add(color.Underline)
+	ret := cl.Sprintf("%s : %d\n", c.Message, c.Points)
 	return ret + DebugCondition(c.Condition)
 }
 
