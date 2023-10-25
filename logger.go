@@ -32,10 +32,6 @@ func DebugCondition(cond Condition) string {
 	return DebugCondition1(cond, 0)
 }
 
-func indentWrap(str string, indentStr string) string {
-	return indentStr + str + indentStr + "}"
-}
-
 var colorArray []color.Attribute = []color.Attribute{color.FgGreen, color.FgYellow, color.FgMagenta, color.FgCyan}
 
 func formatHint(hint string) string {
@@ -93,6 +89,8 @@ func DebugCondition1(cond Condition, indentLevel int) string {
 			parts = append(parts, fmt.Sprintf("%s=\"%v\"", field.Name, value))
 		}
 
-		return fmt.Sprintf("%s%s(%s)", indent, ty.Name(), strings.Join(parts, ", "))
+		// BaseCondition is always field 0 (guaranteed)
+		hint := val.Field(0).FieldByName("Hint").String()
+		return fmt.Sprintf("%s%s(%s)%s", indent, ty.Name(), strings.Join(parts, ", "), formatHint(hint))
 	}
 }
