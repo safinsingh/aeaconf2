@@ -36,7 +36,7 @@ func BuildAndTree(conditions []Condition) Condition {
 func CheckFunctionRegistry(funcs map[string]reflect.Type) {
 	for funcName, ty := range funcs {
 		if ty.NumField() == 0 {
-			panic(fmt.Sprintf("ICE: function '%s' has invalid # of arguments: 0", funcName))
+			panic(fmt.Sprintf("ICE: function '%s' has invalid # of arguments: 0 (must include BaseCondition)", funcName))
 		}
 
 		field0 := ty.Field(0)
