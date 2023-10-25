@@ -49,6 +49,9 @@ password = "password"
 
 # parsed
 
+- checks are serialized directly to their respective function struct, e.g. `PathExists`
+- each function must implement `Score() bool`. other than that, new functions you add in `functions.go` **just work**
+
 this is the parsed output (it parses hints on a per-check, per-condition, and even per-boolean-expression level)
 
 ![](./assets/screenshot.png)
