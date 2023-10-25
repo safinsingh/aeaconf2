@@ -5,18 +5,28 @@ import (
 	"reflect"
 )
 
-func GetSourceVisualLocation(source []byte, pos int) (int, int) {
+func (l *Lexer) GetSourceVisualLocation() (int, int) {
 	line := 1
 	column := 1
-	for i := 0; i < pos; i++ {
-		if source[i] == '\n' {
+	for i := 0; i < l.Pos; i++ {
+		if l.Source[i] == '\n' {
 			line++
 			column = 1
 		} else {
 			column++
 		}
 	}
-	return line, column
+	return line + l.LineOffset, column
+}
+
+func CountLines(source []byte) int {
+	ret := 0
+	for _, b := range source {
+		if b == '\n' {
+			ret++
+		}
+	}
+	return ret + 1
 }
 
 func BuildAndTree(conditions []Condition) Condition {

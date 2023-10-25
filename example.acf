@@ -31,6 +31,8 @@ password = password
 
 // checks can be shortened to a single line with a semicolon (;)
 "Check3": 4 ["hint before semicolon"]; ServiceUp "sshd" || PathExists "/etc/ssh"
+// note that single-line checks cannot have conditions on following indented lines;
+// the entire boolean expression must be on one line.
 
 "Check4": 6
   // hints can also be specified on parenthesized expressions

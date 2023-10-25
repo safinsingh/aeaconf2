@@ -112,7 +112,7 @@ func (p *Parser) SkipIndentIfHanging() {
 
 func (p *Parser) Errorf(format string, a ...any) {
 	message := fmt.Sprintf(format, a...)
-	line, column := GetSourceVisualLocation(p.Lexer.Source, p.Lexer.Pos)
+	line, column := p.Lexer.GetSourceVisualLocation()
 	Fatal(STAGE_PARSER, fmt.Sprintf("(line %d, column %d) %s", line, column, message))
 }
 
@@ -178,7 +178,7 @@ func (p *Parser) ParseFactor() Condition {
 	} else if next.Type == TokenIdent {
 		cond = p.ParseFunc()
 	} else {
-		p.Errorf("unhandled token while parsing boolean expression on check '%s': %s", p.CurrentCheck, next.Debug())
+		p.Errorf("invalid boolean expression for check '%s': expected function or parenthesized expression, got '%s'", p.CurrentCheck, next.Debug())
 	}
 
 	if hint, ok := p.MaybeParseHint(); ok {

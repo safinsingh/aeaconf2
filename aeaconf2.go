@@ -31,7 +31,7 @@ func main() {
 		Fatal(STAGE_INI, fmt.Sprintf("failed to parse ini header: %s", err.Error()))
 	}
 
-	l := NewLexer(bytes.TrimSpace(checksRaw))
+	l := NewLexer(bytes.TrimSpace(checksRaw), CountLines(headerIni))
 	p := NewParser(l)
 	config.Checks = p.Checks()
 	config.DistributeMaxPoints()

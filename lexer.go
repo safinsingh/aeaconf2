@@ -100,17 +100,18 @@ func (t *Token) Value() any {
 }
 
 type Lexer struct {
-	Source []byte
-	Pos    int
+	Source     []byte
+	Pos        int
+	LineOffset int
 }
 
-func NewLexer(source []byte) *Lexer {
-	return &Lexer{Source: source, Pos: 0}
+func NewLexer(source []byte, lineOffset int) *Lexer {
+	return &Lexer{Source: source, Pos: 0, LineOffset: lineOffset}
 }
 
 func (l *Lexer) Errorf(format string, a ...any) {
 	message := fmt.Sprintf(format, a...)
-	line, column := GetSourceVisualLocation(l.Source, l.Pos)
+	line, column := l.GetSourceVisualLocation()
 	Fatal(STAGE_LEXER, fmt.Sprintf("(line %d, column %d) %s", line, column, message))
 }
 
