@@ -44,7 +44,7 @@ func formatHint(hint string) string {
 	if hint == "" {
 		return ""
 	}
-	muted := color.New(color.FgHiBlack).SprintFunc()
+	muted := color.New(color.Reset).Add(color.FgHiBlack).SprintFunc()
 	return muted(" HINT [ " + hint + " ]")
 }
 
