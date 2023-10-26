@@ -65,7 +65,7 @@ func (c *Config) DistributeMaxPoints() {
 	totalCheckPoints := 0
 	for _, check := range c.Checks {
 		totalCheckPoints += check.Points
-		if check.NeedsPoints {
+		if check.PointsEmpty {
 			unspecifiedPointsChecks = append(unspecifiedPointsChecks, check)
 		}
 	}
@@ -86,6 +86,6 @@ func (c *Config) DistributeMaxPoints() {
 
 	for _, check := range unspecifiedPointsChecks {
 		check.Points = pointsPerCheck
-		check.NeedsPoints = false
+		check.PointsEmpty = false
 	}
 }

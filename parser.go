@@ -17,15 +17,18 @@ type Check struct {
 	Message string
 	Points  int
 	// points were left unspecified
-	NeedsPoints bool
+	PointsEmpty bool
 
 	// the root condition can have a hint
 	Condition
+
+	// separate root hint from condition tree
+	Hint string
 }
 
 func (c *Check) Debug() string {
 	cl := color.New(color.Bold)
-	ret := cl.Sprintf("%s (%d Points)\n", c.Message, c.Points)
+	ret := cl.Sprintf("%s (%d Points)%s\n", c.Message, c.Points, formatHint(c.Hint))
 	return ret + DebugCondition(c.Condition)
 }
 
@@ -34,11 +37,11 @@ type Parser struct {
 	Lookahead      *Token
 	LookaheadValid bool
 	// currently-parsing check message; used for debugging
-	CurrentCheck string
+	CurrentCheckMessage string
 }
 
 func NewParser(lexer *Lexer) *Parser {
-	return &Parser{Lexer: lexer, Lookahead: nil, LookaheadValid: false, CurrentCheck: "N/A"}
+	return &Parser{Lexer: lexer, Lookahead: nil, LookaheadValid: false}
 }
 
 func (p *Parser) Peek() *Token {
@@ -106,7 +109,7 @@ func (p *Parser) SkipUntilIndentedBlock() bool {
 //	FileContains "abc" "abc"
 func (p *Parser) SkipIndentIfHanging() {
 	if !p.SkipUntilIndentedBlock() {
-		p.Errorf("unterminated hanging boolean operator for check: '%s'", p.CurrentCheck)
+		p.Errorf("unterminated hanging boolean operator for check: '%s'", p.CurrentCheckMessage)
 	}
 }
 
@@ -126,7 +129,7 @@ func (p *Parser) ExpectTokenType(tokenType TokenType, msg string) *Token {
 	return nextToken
 }
 
-func (p *Parser) MaybeParseHint() (string, bool) {
+func (p *Parser) MaybeParseHint() string {
 	if p.Peek().Type == TokenLBracket {
 		// assume LBracket ([) has been peeked
 		p.Consume()
@@ -138,9 +141,9 @@ func (p *Parser) MaybeParseHint() (string, bool) {
 			TokenRBracket,
 			fmt.Sprintf("expecting closing right-brace (]) for hint: %s", hintString.Value()),
 		)
-		return hintString.Value().(string), true
+		return hintString.Value().(string)
 	}
-	return "", false
+	return ""
 }
 
 func (p *Parser) ParseCondition() Condition {
@@ -174,14 +177,22 @@ func (p *Parser) ParseFactor() Condition {
 	if next.Type == TokenLParen {
 		p.Consume()
 		cond = p.ParseCondition()
-		p.ExpectTokenType(TokenRParen, fmt.Sprintf("expected closing right parenthese for condition for check: '%s'", p.CurrentCheck))
+		p.ExpectTokenType(
+			TokenRParen,
+			fmt.Sprintf("expected closing right parenthese for condition for check: '%s'", p.CurrentCheckMessage),
+		)
 	} else if next.Type == TokenIdent {
 		cond = p.ParseFunc()
 	} else {
-		p.Errorf("invalid boolean expression for check '%s': expected function or parenthesized expression, got '%s'", p.CurrentCheck, next.Debug())
+		p.Errorf(
+			"invalid boolean expression for check '%s': expected function or parenthesized expression, got '%s'",
+			p.CurrentCheckMessage,
+			next.Debug(),
+		)
 	}
 
-	if hint, ok := p.MaybeParseHint(); ok {
+	hint := p.MaybeParseHint()
+	if len(hint) != 0 {
 		SetConditionHint(cond, hint)
 	}
 	return cond
@@ -237,38 +248,46 @@ func (p *Parser) ParseFunc() Condition {
 func (p *Parser) NextCheck() *Check {
 	p.SkipWhitespace()
 
-	p.CurrentCheck = "_"
-	// if check string isn't placeholder...
-	if !(p.Peek().Type == TokenUnderscore) {
-		p.CurrentCheck = p.ExpectTokenType(
+	// current check has empty message; avoids any "magic" generation-needing message
+	currentCheckMessageEmpty := false
+
+	// parse check name
+	if p.Peek().Type == TokenUnderscore {
+		p.CurrentCheckMessage = "<anonymous>"
+		currentCheckMessageEmpty = true
+		p.Consume()
+	} else {
+		p.CurrentCheckMessage = p.ExpectTokenType(
 			TokenString,
 			"expected check title as a string or placeholder ('_')",
 		).Value().(string)
-	} else {
-		p.Consume()
 	}
 
 	p.ExpectTokenType(
 		TokenColon,
-		fmt.Sprintf("expected a colon following the check message: '%s'", p.CurrentCheck),
+		fmt.Sprintf("expected a colon following the check message: '%s'", p.CurrentCheckMessage),
 	)
 
+	// parse points
 	points := 0
-	needsPoints := false
+	pointsEmpty := false
 	// if point number isn't a placeholder
-	if !(p.Peek().Type == TokenUnderscore) {
+	if p.Peek().Type == TokenUnderscore {
+		pointsEmpty = true
+		p.Consume()
+	} else {
 		points = p.ExpectTokenType(
 			TokenNumber,
-			fmt.Sprintf("expected numeric point value to follow colon for check: '%s'", p.CurrentCheck),
+			fmt.Sprintf("expected integer point value or placeholder ('_') to follow colon for check: '%s'",
+				p.CurrentCheckMessage),
 		).Value().(int)
-	} else {
-		p.Consume()
-		needsPoints = true
 	}
 
-	rootHint, hinted := p.MaybeParseHint()
+	// parse hint if it exists
+	rootHint := p.MaybeParseHint()
 
 	var finalCond Condition
+	// if single-line check
 	if p.Peek().Type == TokenSemicolon {
 		p.Consume()
 		finalCond = p.ParseCondition()
@@ -281,23 +300,21 @@ func (p *Parser) NextCheck() *Check {
 
 		// no conditions parsed
 		if len(andedConditions) == 0 {
-			p.Errorf("unexpected end of file: expected an indented condition block for check '%s'", p.CurrentCheck)
+			p.Errorf(
+				"unexpected end of file: expected an indented condition block for check '%s'",
+				p.CurrentCheckMessage,
+			)
 		}
 
 		finalCond = BuildAndTree(andedConditions)
 	}
 
-	if hinted {
-		SetConditionHint(finalCond, rootHint)
-	}
-
-	checkString := p.CurrentCheck
-	if p.CurrentCheck == "_" {
+	checkString := p.CurrentCheckMessage
+	if currentCheckMessageEmpty {
 		checkString = finalCond.DefaultString()
 	}
 
-	p.CurrentCheck = "N/A"
-	return &Check{Message: checkString, Points: points, NeedsPoints: needsPoints, Condition: finalCond}
+	return &Check{Message: checkString, Points: points, PointsEmpty: pointsEmpty, Condition: finalCond, Hint: rootHint}
 }
 
 func (p *Parser) Checks() []*Check {
