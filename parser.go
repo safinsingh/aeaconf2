@@ -41,7 +41,7 @@ type Parser struct {
 }
 
 func NewParser(lexer *Lexer) *Parser {
-	return &Parser{Lexer: lexer, Lookahead: nil, LookaheadValid: false, CurrentCheckMessage: "N/A"}
+	return &Parser{Lexer: lexer, Lookahead: nil, LookaheadValid: false}
 }
 
 func (p *Parser) Peek() *Token {
@@ -124,16 +124,6 @@ func (p *Parser) ExpectTokenType(tokenType TokenType, msg string) *Token {
 	if nextToken.Type != tokenType {
 		p.Errorf("expected token of type '%s', got '%s' (type '%s'): %s",
 			tokenType.Str(), nextToken.Value(), nextToken.Type.Str(), msg)
-		return nil // unreachable
-	}
-	return nextToken
-}
-
-func (p *Parser) ExpectTokenType2(tokenType1 TokenType, tokenType2 TokenType, msg string) *Token {
-	nextToken := p.Consume()
-	if nextToken.Type != tokenType1 && nextToken.Type != tokenType2 {
-		p.Errorf("expected token of type '%s' or '%s', got '%s' (type '%s'): %s",
-			tokenType1.Str(), tokenType2.Str(), nextToken.Value(), nextToken.Type.Str(), msg)
 		return nil // unreachable
 	}
 	return nextToken
