@@ -68,33 +68,45 @@ func (p *Parser) SkipTokenType(tokenType TokenType) {
 	}
 }
 
-func (p *Parser) SkipWhitespace() {
-	for {
-		token := p.Peek()
-		if token.Type != TokenNewline && token.Type != TokenIndent {
-			break
-		}
-		p.Consume()
-	}
-}
-
-func (p *Parser) SkipUntilIndentedBlock() bool {
+func (p *Parser) SkipUntilNewlineBlock() {
 	for {
 		token := p.Peek()
 		if token.Type == TokenNewline {
 			p.Consume()
 			token = p.Peek()
-			if token.Type != TokenNewline && token.Type != TokenIndent {
-				return false
+			if token.Type != TokenIndent && token.Type != TokenNewline {
+				return
 			}
 		} else if token.Type == TokenIndent {
 			p.Consume()
-			if p.Peek().Type == TokenNewline {
-				p.Consume()
-			} else {
-				// reached non-newline token after indent
+			token = p.Peek()
+			if token.Type != TokenNewline {
+				p.Errorf("expected non-indented line to begin new check")
+			}
+		} else if token.Type == TokenEOF {
+			p.Errorf("unexpected EOF: expected non-indented line to begin new check")
+		} else {
+			return
+		}
+	}
+}
+
+func (p *Parser) SkipUntilIndentedBlock() bool {
+	for {
+		token1 := p.Peek()
+		if token1.Type == TokenIndent {
+			p.Consume()
+			if p.Peek().Type != TokenNewline {
 				return true
 			}
+		} else if token1.Type == TokenNewline {
+			p.Consume()
+			token2 := p.Peek()
+			if token2.Type != TokenIndent && token2.Type != TokenNewline {
+				return false
+			}
+		} else if token1.Type == TokenEOF {
+			p.Errorf("unexpected EOF: expected indented line to begin new condition")
 		} else {
 			return true
 		}
@@ -107,9 +119,9 @@ func (p *Parser) SkipUntilIndentedBlock() bool {
 //
 //	PathExists "/abc" ||
 //	FileContains "abc" "abc"
-func (p *Parser) SkipIndentIfHanging() {
-	if !p.SkipUntilIndentedBlock() {
-		p.Errorf("unterminated hanging boolean operator for check: '%s'", p.CurrentCheckMessage)
+func (p *Parser) SkipUntilIndentedBlockIfHanging() {
+	if p.Peek().Type == TokenNewline {
+		p.SkipUntilIndentedBlock()
 	}
 }
 
@@ -150,7 +162,7 @@ func (p *Parser) ParseCondition() Condition {
 	lhs := p.ParseAnd()
 	for p.Peek().Type == TokenOr {
 		p.Consume()
-		p.SkipIndentIfHanging()
+		p.SkipUntilIndentedBlockIfHanging()
 
 		rhs := p.ParseAnd()
 		lhs = &OrExpr{Lhs: lhs, Rhs: rhs}
@@ -162,7 +174,7 @@ func (p *Parser) ParseAnd() Condition {
 	lhs := p.ParseFactor()
 	for p.Peek().Type == TokenAnd {
 		p.Consume()
-		p.SkipIndentIfHanging()
+		p.SkipUntilIndentedBlockIfHanging()
 
 		rhs := p.ParseFactor()
 		lhs = &AndExpr{Lhs: lhs, Rhs: rhs}
@@ -211,7 +223,7 @@ func (p *Parser) ParseFunc() Condition {
 		funcName = funcName[:notIdx]
 	}
 
-	funcType, found := funcRegistry[funcName]
+	funcType, found := FuncRegistry[funcName]
 	if !found {
 		p.Errorf("invalid function name: %s", funcName)
 	}
@@ -246,7 +258,7 @@ func (p *Parser) ParseFunc() Condition {
 }
 
 func (p *Parser) NextCheck() *Check {
-	p.SkipWhitespace()
+	p.SkipUntilNewlineBlock()
 
 	// current check has empty message; avoids any "magic" generation-needing message
 	currentCheckMessageEmpty := false
@@ -293,7 +305,7 @@ func (p *Parser) NextCheck() *Check {
 		finalCond = p.ParseCondition()
 	} else {
 		var andedConditions []Condition
-		for p.SkipUntilIndentedBlock() && p.Peek().Type != TokenEOF {
+		for p.SkipUntilIndentedBlock() {
 			cond := p.ParseCondition()
 			andedConditions = append(andedConditions, cond)
 		}
@@ -321,6 +333,7 @@ func (p *Parser) Checks() []*Check {
 	var checks []*Check
 	for p.Peek().Type != TokenEOF {
 		checks = append(checks, p.NextCheck())
+		p.SkipUntilNewlineBlock()
 	}
 	return checks
 }

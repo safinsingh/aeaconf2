@@ -67,11 +67,7 @@ _: _; ServiceUpNot "nginx"
 // any function can be suffixed with 'Not' to flip its output
 ```
 
-# parsed
+# parsing
 
 - checks are serialized directly to their respective function struct, e.g. `PathExists`
 - each function must implement `Score() bool` and `DefaultString() string` (see [`functions.go`](./functions.go))
-
-this is the parsed output (it parses hints on a per-check, per-condition, and even per-boolean-expression level)
-
-![](./assets/screenshot.png)

@@ -53,5 +53,4 @@ _: 7
 
 // you can even do both!
 _: _; ServiceUpNot "nginx"
-
 // any function can be suffixed with 'Not' to flip its output
