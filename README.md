@@ -81,8 +81,8 @@ var funcRegistry = make(map[string]reflect.Type)
 
 func init() {
 	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
-  // remember to add each function to this map
-  CheckFunctionRegistry(funcRegistry)
+	// remember to add each function to this map
+	CheckFunctionRegistry(funcRegistry)
 }
 
 type PathExists struct {

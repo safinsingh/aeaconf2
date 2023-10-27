@@ -57,20 +57,6 @@ func (n *NotFunc) DefaultString() string {
 	return fmt.Sprintf("NOT (%s)", n.Func.DefaultString())
 }
 
-// I hate go
-func GetConditionHint(cond Condition) string {
-	val := reflect.ValueOf(cond)
-	baseCond := val.FieldByName("BaseCondition")
-	if baseCond.IsValid() {
-		hint := baseCond.FieldByName("Hint")
-		if hint.IsValid() {
-			return hint.String()
-		}
-	}
-
-	panic("ICE: could not get condition hint")
-}
-
 // I still hate go
 func SetConditionHint(cond Condition, newHint string) {
 	val := reflect.ValueOf(cond)

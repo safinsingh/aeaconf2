@@ -65,19 +65,19 @@ func (p *Parser) SkipUntilNewlineBlock() {
 
 func (p *Parser) SkipUntilIndentedBlock() bool {
 	for {
-		token1 := p.Peek()
-		if token1.Type == TokenIndent {
+		token := p.Peek()
+		if token.Type == TokenIndent {
 			p.Consume()
 			if p.Peek().Type != TokenNewline {
 				return true
 			}
-		} else if token1.Type == TokenNewline {
+		} else if token.Type == TokenNewline {
 			p.Consume()
-			token2 := p.Peek()
-			if token2.Type != TokenIndent && token2.Type != TokenNewline {
+			token = p.Peek()
+			if token.Type != TokenIndent && token.Type != TokenNewline {
 				return false
 			}
-		} else if token1.Type == TokenEOF {
+		} else if token.Type == TokenEOF {
 			p.Errorf("unexpected EOF: expected indented line to begin new condition")
 		} else {
 			return true
@@ -183,7 +183,7 @@ func (p *Parser) ParseFunc() Condition {
 	}
 
 	notFunc := false
-	notIdx := len(funcName) - 3
+	notIdx := len(funcName) - len("Not")
 	if funcName[notIdx:] == "Not" {
 		notFunc = true
 		funcName = funcName[:notIdx]
@@ -204,7 +204,7 @@ func (p *Parser) ParseFunc() Condition {
 		arg := p.ExpectTokenType(
 			TokenString,
 			fmt.Sprintf(
-				"expected argument for condition '%s': '%s' (at %d out of %d total arguments)",
+				"expected argument for condition '%s': '%s' (arg %d out of %d total arguments)",
 				funcName,
 				field.Name,
 				i,
