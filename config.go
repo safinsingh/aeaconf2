@@ -18,9 +18,7 @@ type Check struct {
 	// points were left unspecified
 	PointsEmpty bool
 
-	// the root condition can have a hint
 	Condition
-
 	// separate root hint from condition tree
 	Hint string
 }
