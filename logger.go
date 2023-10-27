@@ -35,6 +35,7 @@ func Fatal(stage CompilerStage, message string) {
 	}
 
 	fmt.Fprintf(os.Stderr, "[%s] FATAL: %s\n", stageStr, message)
+	os.Exit(1)
 }
 
 func DebugCondition(cond Condition) string {
