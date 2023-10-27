@@ -5,14 +5,14 @@ import (
 	"reflect"
 )
 
-var FuncRegistry = make(map[string]reflect.Type)
+var funcRegistry = make(map[string]reflect.Type)
 
 func init() {
-	FuncRegistry["PathExists"] = reflect.TypeOf(PathExists{})
-	FuncRegistry["FileContains"] = reflect.TypeOf(FileContains{})
-	FuncRegistry["ServiceUp"] = reflect.TypeOf(ServiceUp{})
+	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
+	funcRegistry["FileContains"] = reflect.TypeOf(FileContains{})
+	funcRegistry["ServiceUp"] = reflect.TypeOf(ServiceUp{})
 
-	CheckFunctionRegistry(FuncRegistry)
+	CheckFunctionRegistry(funcRegistry)
 }
 
 type PathExists struct {

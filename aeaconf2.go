@@ -32,7 +32,7 @@ func main() {
 	}
 
 	l := NewLexer(bytes.TrimSpace(checksRaw), CountLines(headerIni))
-	p := NewParser(l)
+	p := NewParser(l, funcRegistry)
 	config.Checks = p.Checks()
 	config.DistributeMaxPoints()
 

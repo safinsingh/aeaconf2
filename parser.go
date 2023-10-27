@@ -38,10 +38,13 @@ type Parser struct {
 	LookaheadValid bool
 	// currently-parsing check message; used for debugging
 	CurrentCheckMessage string
+
+	// map from function names to corresponding reflect type
+	FuncRegistry map[string]reflect.Type
 }
 
-func NewParser(lexer *Lexer) *Parser {
-	return &Parser{Lexer: lexer, Lookahead: nil, LookaheadValid: false}
+func NewParser(lexer *Lexer, funcRegistry map[string]reflect.Type) *Parser {
+	return &Parser{Lexer: lexer, Lookahead: nil, LookaheadValid: false, FuncRegistry: funcRegistry}
 }
 
 func (p *Parser) Peek() *Token {
@@ -223,8 +226,8 @@ func (p *Parser) ParseFunc() Condition {
 		funcName = funcName[:notIdx]
 	}
 
-	funcType, found := FuncRegistry[funcName]
-	if !found {
+	funcType, ok := p.FuncRegistry[funcName]
+	if !ok {
 		p.Errorf("invalid function name: %s", funcName)
 	}
 	numArgs := funcType.NumField()
