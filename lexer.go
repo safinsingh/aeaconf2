@@ -115,6 +115,20 @@ func (l *Lexer) Errorf(format string, a ...any) {
 	Fatal(STAGE_LEXER, fmt.Sprintf("(line %d, column %d) %s", line, column, message))
 }
 
+func (l *Lexer) GetSourceVisualLocation() (int, int) {
+	line := 1
+	column := 1
+	for i := 0; i < l.Pos; i++ {
+		if l.Source[i] == '\n' {
+			line++
+			column = 1
+		} else {
+			column++
+		}
+	}
+	return line + l.LineOffset, column
+}
+
 func (l *Lexer) ExpectCharacter(ch byte) {
 	if l.Pos < len(l.Source) {
 		if l.Source[l.Pos] == ch {

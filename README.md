@@ -67,7 +67,47 @@ _: _; ServiceUpNot "nginx"
 // any function can be suffixed with 'Not' to flip its output
 ```
 
-# parsing
+## parsing
 
 - checks are serialized directly to their respective function struct, e.g. `PathExists`
-- each function must implement `Score() bool` and `DefaultString() string` (see [`functions.go`](./functions.go))
+- each function must implement `Score() bool` and `DefaultString() string` (see [`functions_example.go`](./functions_example.go))
+
+## library usage
+
+Create a function registry:
+
+```go
+var funcRegistry = make(map[string]reflect.Type)
+
+func init() {
+	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
+  // remember to add each function to this map
+  CheckFunctionRegistry(funcRegistry)
+}
+
+type PathExists struct {
+	BaseCondition
+	Path string
+}
+
+func (p *PathExists) Score() bool {
+	return true
+}
+
+func (p *PathExists) DefaultString() string {
+	return fmt.Sprintf("Path '%s' exists", p.Path)
+}
+
+// add more...
+```
+
+Call `aeaconf2.GetConfig(filename string, funcRegistry map[string]reflect.Type)`:
+
+```go
+func main() {
+	config := GetConfig("example.acf", funcRegistry)
+	for _, check := range config.Checks {
+		fmt.Println(check.Debug() + "\n")
+	}
+}
+```

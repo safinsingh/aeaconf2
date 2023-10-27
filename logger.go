@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
 	"reflect"
 	"strings"
 
@@ -12,7 +12,8 @@ import (
 type CompilerStage int
 
 const (
-	STAGE_INI CompilerStage = iota
+	STAGE_PRE CompilerStage = iota
+	STAGE_INI
 	STAGE_LEXER
 	STAGE_PARSER
 	STAGE_DISTRIBUTION
@@ -21,6 +22,8 @@ const (
 func Fatal(stage CompilerStage, message string) {
 	var stageStr string
 	switch stage {
+	case STAGE_PRE:
+		stageStr = "pre"
 	case STAGE_INI:
 		stageStr = "ini parser"
 	case STAGE_LEXER:
@@ -31,7 +34,7 @@ func Fatal(stage CompilerStage, message string) {
 		stageStr = "point distribution"
 	}
 
-	log.Fatalf("[%s] FATAL: %s", stageStr, message)
+	fmt.Fprintf(os.Stderr, "[%s] FATAL: %s\n", stageStr, message)
 }
 
 func DebugCondition(cond Condition) string {

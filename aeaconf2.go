@@ -3,16 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
+	"reflect"
 	"regexp"
 
 	"gopkg.in/ini.v1"
 )
-
-func init() {
-	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-}
 
 func separateConfig(config []byte) ([]byte, []byte) {
 	re := regexp.MustCompile(`(?m)^[[:space:]]*---[[:space:]]*$`)
@@ -21,12 +17,15 @@ func separateConfig(config []byte) ([]byte, []byte) {
 	return config[:loc[0]], config[loc[1]:]
 }
 
-func main() {
-	data, _ := os.ReadFile("example.acf")
+func GetConfig(fileName string, funcRegistry map[string]reflect.Type) *Config {
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		Fatal(STAGE_PRE, fmt.Sprintf("failed to read config file '%s': %s", fileName, err.Error()))
+	}
 	headerIni, checksRaw := separateConfig(data)
 
 	config := NewConfig()
-	err := ini.MapTo(config, headerIni)
+	err = ini.MapTo(config, headerIni)
 	if err != nil {
 		Fatal(STAGE_INI, fmt.Sprintf("failed to parse ini header: %s", err.Error()))
 	}
@@ -36,6 +35,11 @@ func main() {
 	config.Checks = p.Checks()
 	config.DistributeMaxPoints()
 
+	return config
+}
+
+func main() {
+	config := GetConfig("example.acf", funcRegistry)
 	for _, check := range config.Checks {
 		fmt.Println(check.Debug() + "\n")
 	}
