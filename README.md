@@ -57,7 +57,7 @@ _: _; ServiceUpNot "nginx"
 
 ## library usage
 
-See `*_example.go`. Here's the gist:
+See `*_test.go` for examples. Here's the gist:
 
 1. Create a function registry
 2. Use `AeaconfBuilder` to parse checks
@@ -67,7 +67,7 @@ See `*_example.go`. Here's the gist:
 ```go
 func main() {
 	// Add each function to this map
-	var funcRegistry = make(map[string]reflect.Type)
+	funcRegistry := make(map[string]reflect.Type)
 
 	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
 	// ...
@@ -93,7 +93,7 @@ func (p *PathExists) DefaultString() string {
 
 ### `AeaconfBuilder`
 
-See `main_example.go` for full example
+See `main_test.go` for full example with `go-ini`
 
 ```go
 func main() {
@@ -103,7 +103,7 @@ func main() {
 	exampleFunctionRegistry := getFunctionRegistry()
 	ab := DefaultAeaconfBuilder(checksRaw, exampleFunctionRegistry).
 		SetLineOffset(CountLines(headerRaw)).
-		SetMaxPoints(cfg.Round.MaxPoints)
+		SetMaxPoints(cfg.Round.MaxPoints) // optional--defaults to 100
 
 	checks := ab.GetChecks()
 	// use checks

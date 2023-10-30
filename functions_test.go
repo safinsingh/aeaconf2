@@ -1,23 +1,25 @@
-package main
+package aeaconf2_test
 
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/safinsingh/aeaconf2"
 )
 
 func getFunctionRegistry() map[string]reflect.Type {
-	var funcRegistry = make(map[string]reflect.Type)
+	funcRegistry := make(map[string]reflect.Type)
 
 	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
 	funcRegistry["FileContains"] = reflect.TypeOf(FileContains{})
 	funcRegistry["ServiceUp"] = reflect.TypeOf(ServiceUp{})
 
-	CheckFunctionRegistry(funcRegistry)
+	aeaconf2.CheckFunctionRegistry(funcRegistry)
 	return funcRegistry
 }
 
 type PathExists struct {
-	BaseCondition
+	aeaconf2.BaseCondition
 	Path string
 }
 
@@ -30,7 +32,7 @@ func (p *PathExists) DefaultString() string {
 }
 
 type FileContains struct {
-	BaseCondition
+	aeaconf2.BaseCondition
 	File  string
 	Value string
 }
@@ -44,7 +46,7 @@ func (f *FileContains) DefaultString() string {
 }
 
 type ServiceUp struct {
-	BaseCondition
+	aeaconf2.BaseCondition
 	Service string
 }
 

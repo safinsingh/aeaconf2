@@ -1,19 +1,9 @@
-package main
+package aeaconf2
 
 import (
 	"fmt"
 	"reflect"
 )
-
-func CountLines(source []byte) int {
-	ret := 0
-	for _, b := range source {
-		if b == '\n' {
-			ret++
-		}
-	}
-	return ret + 1
-}
 
 func BuildAndTree(conditions []Condition) Condition {
 	var result Condition

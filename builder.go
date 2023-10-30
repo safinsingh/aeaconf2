@@ -1,4 +1,4 @@
-package main
+package aeaconf2
 
 import (
 	"bytes"
