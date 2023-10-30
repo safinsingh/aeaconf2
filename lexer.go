@@ -10,7 +10,7 @@ type TokenType int
 
 const (
 	TokenIndent TokenType = iota
-	TokenNewline
+	NewTokenline
 
 	TokenLParen
 	TokenRParen
@@ -33,8 +33,8 @@ const (
 
 func (ty TokenType) Str() string {
 	switch ty {
-	case TokenNewline:
-		return "TokenNewline"
+	case NewTokenline:
+		return "NewTokenline"
 	case TokenIndent:
 		return "TokenIndent"
 	case TokenLParen:
@@ -78,8 +78,8 @@ func NewToken(tokenType TokenType, lexeme []byte) *Token {
 }
 
 func (t *Token) Debug() string {
-	if t.Type == TokenNewline {
-		return "Token{type: TokenNewline, lexeme: '\\n'}"
+	if t.Type == NewTokenline {
+		return "Token{type: NewTokenline, lexeme: '\\n'}"
 	}
 	return fmt.Sprintf("Token{type: %s, lexeme: '%s'}", t.Type.Str(), string(t.Lexeme))
 }
@@ -216,7 +216,7 @@ func (l *Lexer) NextToken() *Token {
 
 	switch ch {
 	case '\n':
-		return l.AdvanceToken(TokenNewline, ch)
+		return l.AdvanceToken(NewTokenline, ch)
 	case '(':
 		return l.AdvanceToken(TokenLParen, ch)
 	case ')':

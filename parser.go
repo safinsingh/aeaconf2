@@ -43,16 +43,16 @@ func (p *Parser) Consume() *Token {
 func (p *Parser) SkipUntilNewlineBlock() {
 	for {
 		token := p.Peek()
-		if token.Type == TokenNewline {
+		if token.Type == NewTokenline {
 			p.Consume()
 			token = p.Peek()
-			if token.Type != TokenIndent && token.Type != TokenNewline {
+			if token.Type != TokenIndent && token.Type != NewTokenline {
 				return
 			}
 		} else if token.Type == TokenIndent {
 			p.Consume()
 			token = p.Peek()
-			if token.Type != TokenNewline {
+			if token.Type != NewTokenline {
 				p.Errorf("expected non-indented line to begin new check")
 			}
 		} else if token.Type == TokenEOF {
@@ -68,13 +68,13 @@ func (p *Parser) SkipUntilIndentedBlock() bool {
 		token := p.Peek()
 		if token.Type == TokenIndent {
 			p.Consume()
-			if p.Peek().Type != TokenNewline {
+			if p.Peek().Type != NewTokenline {
 				return true
 			}
-		} else if token.Type == TokenNewline {
+		} else if token.Type == NewTokenline {
 			p.Consume()
 			token = p.Peek()
-			if token.Type != TokenIndent && token.Type != TokenNewline {
+			if token.Type != TokenIndent && token.Type != NewTokenline {
 				return false
 			}
 		} else if token.Type == TokenEOF {
@@ -92,7 +92,7 @@ func (p *Parser) SkipUntilIndentedBlock() bool {
 //	PathExists "/abc" ||
 //	FileContains "abc" "abc"
 func (p *Parser) SkipUntilIndentedBlockIfHanging() {
-	if p.Peek().Type == TokenNewline {
+	if p.Peek().Type == NewTokenline {
 		p.SkipUntilIndentedBlock()
 	}
 }

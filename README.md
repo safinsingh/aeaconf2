@@ -1,27 +1,10 @@
 # aeaconf2
 
-new config format for [aeacus](https://github.com/elysium-suite/aeacus)
+new check config format for [aeacus](https://github.com/elysium-suite/aeacus)
 
 ## syntax
 
-- the definitions before the separator ("---") is [`ini`](https://en.wikipedia.org/wiki/INI_file)
-- the check/condition definitions that follow use the custom language
-  - comments are denoted by two forward slashes ("//")
-
 ```hcl
-[round]
-title = Linux Round
-os = Ubuntu 20
-user = cpadmin
-local = false
-maxPoints = 32 ; optional (see "Check6" below)
-
-[remote]
-enable = true
-name = LinRound
-server = https://example.com
-password = password
----
 // check messages must be enclosed in quotes
 "SSH is running properly": 2
   // condition lines MUST be indented
@@ -74,15 +57,23 @@ _: _; ServiceUpNot "nginx"
 
 ## library usage
 
-Create a function registry:
+See `*_example.go`. Here's the gist:
+
+1. Create a function registry
+2. Use `AeaconfBuilder` to parse checks
+
+### function registry
 
 ```go
-var funcRegistry = make(map[string]reflect.Type)
+func main() {
+	// Add each function to this map
+	var funcRegistry = make(map[string]reflect.Type)
 
-func init() {
 	funcRegistry["PathExists"] = reflect.TypeOf(PathExists{})
-	// remember to add each function to this map
-	CheckFunctionRegistry(funcRegistry)
+  // ...
+
+  // Use the builtin function registry checker
+	aeaconf2.CheckFunctionRegistry(funcRegistry)
 }
 
 type PathExists struct {
@@ -97,17 +88,24 @@ func (p *PathExists) Score() bool {
 func (p *PathExists) DefaultString() string {
 	return fmt.Sprintf("Path '%s' exists", p.Path)
 }
-
 // add more...
 ```
 
-Call `aeaconf2.GetConfig(filename string, funcRegistry map[string]reflect.Type)`:
+### `AeaconfBuilder`
+
+See `main_example.go` for full example
 
 ```go
 func main() {
-	config := GetConfig("example.acf", funcRegistry)
-	for _, check := range config.Checks {
-		fmt.Println(check.Debug() + "\n")
-	}
+	// parse your config...
+  cfg := // ...
+
+	exampleFunctionRegistry := getFunctionRegistry()
+	ab := DefaultAeaconfBuilder(checksRaw, exampleFunctionRegistry).
+		SetLineOffset(CountLines(headerRaw)).
+		SetMaxPoints(cfg.Round.MaxPoints)
+
+	checks := ab.GetChecks()
+  // use checks
 }
 ```
