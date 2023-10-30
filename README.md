@@ -53,7 +53,7 @@ _: _; ServiceUpNot "nginx"
 ## parsing
 
 - checks are serialized directly to their respective function struct, e.g. `PathExists`
-- each function must implement `Score() bool` and `DefaultString() string` (see [`functions_example.go`](./functions_example.go))
+- each function must implement `Score() (bool, error)` and `DefaultString() string` (see [`functions_test.go`](./functions_test.go))
 
 ## library usage
 
@@ -81,8 +81,8 @@ type PathExists struct {
 	Path string
 }
 
-func (p *PathExists) Score() bool {
-	return true
+func (p *PathExists) Score() (bool, error) {
+	return true, nil
 }
 
 func (p *PathExists) DefaultString() string {

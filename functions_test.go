@@ -23,8 +23,8 @@ type PathExists struct {
 	Path string
 }
 
-func (p *PathExists) Score() bool {
-	return true
+func (p *PathExists) Score() (bool, error) {
+	return true, nil
 }
 
 func (p *PathExists) DefaultString() string {
@@ -37,8 +37,8 @@ type FileContains struct {
 	Value string
 }
 
-func (f *FileContains) Score() bool {
-	return true
+func (f *FileContains) Score() (bool, error) {
+	return true, nil
 }
 
 func (f *FileContains) DefaultString() string {
@@ -50,8 +50,8 @@ type ServiceUp struct {
 	Service string
 }
 
-func (s *ServiceUp) Score() bool {
-	return true
+func (s *ServiceUp) Score() (bool, error) {
+	return true, nil
 }
 
 func (s *ServiceUp) DefaultString() string {
